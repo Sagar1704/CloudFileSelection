@@ -8,7 +8,7 @@ public class ScoreComparator implements Comparator<FileScore> {
 
 	@Override
 	public int compare(FileScore o1, FileScore o2) {
-		if(o1.getScore() < o2.getScore())
+		if (o1.getScore() < o2.getScore())
 			return 1;
 		else
 			return -1;
