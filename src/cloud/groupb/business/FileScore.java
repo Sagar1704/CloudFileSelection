@@ -10,13 +10,12 @@ public class FileScore {
 	public FileScore() {
 		this.setScore(Score.ABSENT.getScore());
 	}
-	
+
 	public FileScore(FileSystem fileSystem) {
 		super();
 		this.fileSystem = fileSystem;
 		this.setScore(Score.ABSENT.getScore());
 	}
-
 
 	public FileSystem getFileSystem() {
 		return fileSystem;
@@ -33,7 +32,7 @@ public class FileScore {
 	public void setScore(int score) {
 		this.score = score;
 	}
-	
+
 	public void incrementScore() {
 		score++;
 	}
