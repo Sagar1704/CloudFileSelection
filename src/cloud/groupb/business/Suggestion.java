@@ -16,7 +16,7 @@ public class Suggestion {
 		this.fileSystems = new TreeSet<FileScore>(new ScoreComparator());
 	}
 
-	public FileSystem getGeneralSuggestion(Map<Parameters, String> selectionMap) {
+	public FileScore getGeneralSuggestion(Map<Parameters, String> selectionMap) {
 		FileScore hdfs = new FileScore(FileSystem.HDFS);
 		FileScore swift = new FileScore(FileSystem.SWIFT);
 		FileScore ceph = new FileScore(FileSystem.CEPH);
@@ -126,6 +126,99 @@ public class Suggestion {
 		fileSystems.add(swift);
 		fileSystems.add(ceph);
 
-		return fileSystems.first().getFileSystem();
+		return fileSystems.first();
 	}
+	
+	public FileScore getIOzoneSuggestion(Map<Parameters, String> selectionMap) {
+		FileScore hdfs = new FileScore(FileSystem.HDFS);
+		FileScore swift = new FileScore(FileSystem.SWIFT);
+		FileScore ceph = new FileScore(FileSystem.CEPH);
+
+		for (Parameters parameter : selectionMap.keySet()) {
+			if (parameter.equals(Parameters.WRITE)) {
+				if (selectionMap.get(parameter).equalsIgnoreCase("moderate")) {
+					hdfs.incrementScore();
+					hdfs.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+				} else if (selectionMap.get(parameter).equalsIgnoreCase("high")) {
+					swift.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+				}
+			} else if (parameter.equals(Parameters.READ)) {
+				if (selectionMap.get(parameter).equalsIgnoreCase("moderate")) {
+					hdfs.incrementScore();
+					hdfs.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+				} else if (selectionMap.get(parameter).equalsIgnoreCase("high")) {
+					swift.incrementScore();
+					swift.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+				}
+			} else if (parameter.equals(Parameters.RE_WRITE)) {
+				if (selectionMap.get(parameter).equalsIgnoreCase("required")) {
+					hdfs.incrementScore();
+					hdfs.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+				} else if (selectionMap.get(parameter).equalsIgnoreCase("not required")) {
+					swift.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+				}
+			} else if (parameter.equals(Parameters.RE_READ)) {
+				if (selectionMap.get(parameter).equalsIgnoreCase("moderate")) {
+					hdfs.incrementScore();
+					hdfs.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+				} else if (selectionMap.get(parameter).equalsIgnoreCase("high")) {
+					swift.incrementScore();
+					swift.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+				}
+			} else if (parameter.equals(Parameters.BACKWARD_READ)) {
+				if (selectionMap.get(parameter).equalsIgnoreCase("required")) {
+					swift.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+				} else if (selectionMap.get(parameter).equalsIgnoreCase("not required")) {
+					hdfs.incrementScore();
+					hdfs.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+				}
+			}  else if (parameter.equals(Parameters.STRIDED_READ)) {
+				if (selectionMap.get(parameter).equalsIgnoreCase("required")) {
+					swift.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+					ceph.incrementScore();
+				} else if (selectionMap.get(parameter).equalsIgnoreCase("not required")) {
+					hdfs.incrementScore();
+					hdfs.incrementScore();
+					swift.incrementScore();
+					ceph.incrementScore();
+				}
+			}
+		}
+
+		fileSystems.add(hdfs);
+		fileSystems.add(swift);
+		fileSystems.add(ceph);
+
+		return fileSystems.first();
+	}
+	
 }

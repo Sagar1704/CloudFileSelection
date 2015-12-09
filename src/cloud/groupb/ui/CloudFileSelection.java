@@ -1,18 +1,22 @@
 package cloud.groupb.ui;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cloud.groupb.business.FileScore;
 import cloud.groupb.business.Suggestion;
+import cloud.groupb.enums.FileSystem;
 import cloud.groupb.enums.Parameters;
 
 /**
@@ -21,10 +25,15 @@ import cloud.groupb.enums.Parameters;
  */
 public class CloudFileSelection {
 
-	private Map<Parameters, String> selectionMap;
+	private Map<Parameters, String> generalSelectionMap;
+	private Map<Parameters, String> iOzoneSelectionMap;
+//	private Map<Parameters, String> customSelectionMap;
+
+	private String[] environment = { "." };
 
 	public CloudFileSelection() {
-		selectionMap = new LinkedHashMap<Parameters, String>();
+		generalSelectionMap = new LinkedHashMap<Parameters, String>();
+		iOzoneSelectionMap = new LinkedHashMap<Parameters, String>();
 	}
 
 	protected Shell shell;
@@ -62,17 +71,17 @@ public class CloudFileSelection {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		shell = new Shell();
-		shell.setSize(798, 742);
+		shell = new Shell(~SWT.RESIZE);
+		shell.setSize(788, 697);
 		shell.setText("Cloud File System Selection");
-
+		
 		// General parameters with no time score
 		Group grpGeneral = new Group(shell, SWT.BORDER | SWT.SHADOW_OUT);
 		grpGeneral
 				.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.BOLD));
 		grpGeneral.setToolTipText("General File System Requirements");
 		grpGeneral.setText("General");
-		grpGeneral.setBounds(0, 0, 754, 185);
+		grpGeneral.setBounds(0, 0, 754, 146);
 
 		// File size
 		Group grpFileSize = new Group(grpGeneral, SWT.BORDER
@@ -134,7 +143,7 @@ public class CloudFileSelection {
 		grpRandomaccess.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
 		grpRandomaccess.setText("RandomAccess");
-		grpRandomaccess.setBounds(118, 105, 137, 52);
+		grpRandomaccess.setBounds(118, 87, 137, 52);
 
 		Button btnRandomYes = new Button(grpRandomaccess, SWT.RADIO);
 		btnRandomYes.setBounds(10, 22, 38, 20);
@@ -152,7 +161,7 @@ public class CloudFileSelection {
 		grpStorageType.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
 		grpStorageType.setText("Storage Type");
-		grpStorageType.setBounds(443, 105, 225, 52);
+		grpStorageType.setBounds(443, 87, 225, 52);
 
 		Button btnStorageBlock = new Button(grpStorageType, SWT.RADIO);
 		btnStorageBlock.setText("Block storage");
@@ -167,7 +176,7 @@ public class CloudFileSelection {
 		// Redundant metadata server
 		Group grpRedundantMetadataServer = new Group(grpGeneral, SWT.BORDER
 				| SWT.SHADOW_ETCHED_IN);
-		grpRedundantMetadataServer.setBounds(261, 105, 176, 52);
+		grpRedundantMetadataServer.setBounds(261, 87, 176, 52);
 		grpRedundantMetadataServer.setFont(SWTResourceManager.getFont(
 				"Segoe UI", 9, SWT.BOLD));
 		grpRedundantMetadataServer.setText("Redundant Metadata Server");
@@ -187,7 +196,7 @@ public class CloudFileSelection {
 		Group grpIozone = new Group(shell, SWT.BORDER | SWT.SHADOW_OUT);
 		grpIozone.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.BOLD));
 		grpIozone.setText("IOzone");
-		grpIozone.setBounds(0, 203, 754, 236);
+		grpIozone.setBounds(0, 152, 754, 219);
 
 		// Write
 		Group grpWriteEfficiency = new Group(grpIozone, SWT.BORDER
@@ -195,15 +204,15 @@ public class CloudFileSelection {
 		grpWriteEfficiency.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
 		grpWriteEfficiency.setText("Write Efficiency");
-		grpWriteEfficiency.setBounds(99, 27, 294, 57);
+		grpWriteEfficiency.setBounds(117, 27, 276, 57);
 
 		Button btnWriteModerate = new Button(grpWriteEfficiency, SWT.RADIO);
-		btnWriteModerate.setBounds(10, 24, 152, 20);
+		btnWriteModerate.setBounds(10, 24, 119, 20);
 		btnWriteModerate.setText("Moderate");
 		btnWriteModerate.setSelection(true);
 
 		Button btnWriteHigh = new Button(grpWriteEfficiency, SWT.RADIO);
-		btnWriteHigh.setBounds(168, 24, 106, 20);
+		btnWriteHigh.setBounds(135, 24, 131, 20);
 		btnWriteHigh.setText("High");
 		// Re-Write
 
@@ -213,7 +222,7 @@ public class CloudFileSelection {
 		grpReadEfficiency.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
 		grpReadEfficiency.setText("Read Efficiency");
-		grpReadEfficiency.setBounds(399, 27, 294, 57);
+		grpReadEfficiency.setBounds(399, 27, 267, 57);
 
 		Button btnReadModerate = new Button(grpReadEfficiency, SWT.RADIO);
 		btnReadModerate.setText("Moderate");
@@ -222,7 +231,7 @@ public class CloudFileSelection {
 
 		Button btnReadHigh = new Button(grpReadEfficiency, SWT.RADIO);
 		btnReadHigh.setText("High");
-		btnReadHigh.setBounds(135, 24, 139, 20);
+		btnReadHigh.setBounds(135, 24, 111, 20);
 		// Random Mix
 
 		// Backward read
@@ -231,32 +240,28 @@ public class CloudFileSelection {
 		grpBackwardReadEfficiency.setFont(SWTResourceManager.getFont(
 				"Segoe UI", 9, SWT.BOLD));
 		grpBackwardReadEfficiency.setText("Backward Read");
-		grpBackwardReadEfficiency.setBounds(99, 90, 294, 58);
+		grpBackwardReadEfficiency.setBounds(117, 154, 276, 58);
 
-		Button btnBackwardReadModerate = new Button(grpBackwardReadEfficiency,
-				SWT.RADIO);
-		btnBackwardReadModerate.addSelectionListener(new SelectionAdapter() {
+		Button btnBackwardReadNotRequired = new Button(
+				grpBackwardReadEfficiency, SWT.RADIO);
+		btnBackwardReadNotRequired.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 			}
 		});
-		btnBackwardReadModerate.setText("Supported");
-		btnBackwardReadModerate.setBounds(106, 24, 76, 20);
+		btnBackwardReadNotRequired.setText("Not Required");
+		btnBackwardReadNotRequired.setBounds(135, 24, 131, 20);
 
-		Button btnBackwardReadHigh = new Button(grpBackwardReadEfficiency,
+		Button btnBackwardReadRequired = new Button(grpBackwardReadEfficiency,
 				SWT.RADIO);
-		btnBackwardReadHigh.setText("Not Supported");
-		btnBackwardReadHigh.setBounds(188, 24, 96, 20);
-
-		Button button = new Button(grpBackwardReadEfficiency, SWT.RADIO);
-		button.addSelectionListener(new SelectionAdapter() {
+		btnBackwardReadRequired.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 			}
 		});
-		button.setText("Not Required");
-		button.setSelection(true);
-		button.setBounds(5, 24, 95, 20);
+		btnBackwardReadRequired.setText("Required");
+		btnBackwardReadRequired.setSelection(true);
+		btnBackwardReadRequired.setBounds(10, 24, 119, 20);
 		// Record Re-write
 
 		// Stride read
@@ -265,21 +270,23 @@ public class CloudFileSelection {
 		grpStridedReadEfficiency.setFont(SWTResourceManager.getFont("Segoe UI",
 				9, SWT.BOLD));
 		grpStridedReadEfficiency.setText("Strided Read Efficiency");
-		grpStridedReadEfficiency.setBounds(399, 90, 294, 58);
+		grpStridedReadEfficiency.setBounds(399, 154, 267, 58);
 
-		Button btnStrideModerate = new Button(grpStridedReadEfficiency,
+		Button btnStridedReadNotRequired = new Button(grpStridedReadEfficiency,
 				SWT.RADIO);
-		btnStrideModerate.setText("Moderate");
-		btnStrideModerate.setBounds(129, 24, 102, 20);
+		btnStridedReadNotRequired.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		btnStridedReadNotRequired.setText("Not Required");
+		btnStridedReadNotRequired.setBounds(136, 24, 111, 20);
 
-		Button btnStrideHigh = new Button(grpStridedReadEfficiency, SWT.RADIO);
-		btnStrideHigh.setText("High");
-		btnStrideHigh.setBounds(237, 24, 47, 20);
-
-		Button btnNotRequired = new Button(grpStridedReadEfficiency, SWT.RADIO);
-		btnNotRequired.setText("Not Required");
-		btnNotRequired.setSelection(true);
-		btnNotRequired.setBounds(10, 24, 113, 20);
+		Button btnStridedReadRequired = new Button(grpStridedReadEfficiency,
+				SWT.RADIO);
+		btnStridedReadRequired.setText("Required");
+		btnStridedReadRequired.setSelection(true);
+		btnStridedReadRequired.setBounds(10, 24, 111, 20);
 		// FRe-Write
 
 		// FWrite
@@ -287,17 +294,27 @@ public class CloudFileSelection {
 				| SWT.SHADOW_ETCHED_IN);
 		grpFwriteEfficiency.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
-		grpFwriteEfficiency.setText("FWrite Efficiency");
-		grpFwriteEfficiency.setBounds(99, 154, 294, 58);
+		grpFwriteEfficiency.setText("Re-Write Efficiency");
+		grpFwriteEfficiency.setBounds(117, 90, 276, 58);
 
-		Button btnFWriteModerate = new Button(grpFwriteEfficiency, SWT.RADIO);
-		btnFWriteModerate.setText("Moderate");
-		btnFWriteModerate.setBounds(10, 24, 111, 20);
-		btnFWriteModerate.setSelection(true);
+		Button btnReWriteModerate = new Button(grpFwriteEfficiency, SWT.RADIO);
+		btnReWriteModerate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		btnReWriteModerate.setText("Required");
+		btnReWriteModerate.setBounds(10, 24, 119, 20);
+		btnReWriteModerate.setSelection(true);
 
-		Button btnFWriteHigh = new Button(grpFwriteEfficiency, SWT.RADIO);
-		btnFWriteHigh.setText("High");
-		btnFWriteHigh.setBounds(168, 24, 106, 20);
+		Button btnReWriteHigh = new Button(grpFwriteEfficiency, SWT.RADIO);
+		btnReWriteHigh.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
+		btnReWriteHigh.setText("Not Required");
+		btnReWriteHigh.setBounds(135, 24, 131, 20);
 		// FWrite
 
 		// FRead
@@ -305,25 +322,26 @@ public class CloudFileSelection {
 				| SWT.SHADOW_ETCHED_IN);
 		grpFReadEfficiency.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
-		grpFReadEfficiency.setText("Fead Efficiency");
-		grpFReadEfficiency.setBounds(399, 154, 294, 58);
+		grpFReadEfficiency.setText("Re-Read Efficiency");
+		grpFReadEfficiency.setBounds(399, 90, 267, 58);
 
-		Button btnFReadModerate = new Button(grpFReadEfficiency, SWT.RADIO);
-		btnFReadModerate.setText("Moderate");
-		btnFReadModerate.setBounds(10, 24, 111, 20);
-		btnFReadModerate.setSelection(true);
+		Button btnReReadModerate = new Button(grpFReadEfficiency, SWT.RADIO);
+		btnReReadModerate.setText("Moderate");
+		btnReReadModerate.setBounds(10, 24, 111, 20);
+		btnReReadModerate.setSelection(true);
 
-		Button btnFReadHigh = new Button(grpFReadEfficiency, SWT.RADIO);
-		btnFReadHigh.setText("High");
-		btnFReadHigh.setBounds(135, 24, 139, 20);
+		Button btnReReadHigh = new Button(grpFReadEfficiency, SWT.RADIO);
+		btnReReadHigh.setText("High");
+		btnReReadHigh.setBounds(135, 24, 111, 20);
 		// FRe-Read
 		// IOzone
 
 		// Custom
 		Group grpCustom = new Group(shell, SWT.BORDER | SWT.SHADOW_OUT);
+		grpCustom.setEnabled(false);
 		grpCustom.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.BOLD));
 		grpCustom.setText("Custom");
-		grpCustom.setBounds(0, 445, 754, 173);
+		grpCustom.setBounds(0, 377, 754, 100);
 		// grpCustom.setSelection(false);
 
 		// Lookup
@@ -332,56 +350,17 @@ public class CloudFileSelection {
 		grpLookupTime.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
 		grpLookupTime.setText("Lookup Time");
-		grpLookupTime.setBounds(151, 26, 113, 67);
+		grpLookupTime.setBounds(117, 26, 147, 67);
 
 		Button btnLookupLow = new Button(grpLookupTime, SWT.RADIO);
-		btnLookupLow.setBounds(10, 35, 43, 20);
+		btnLookupLow.setBounds(10, 35, 61, 20);
 		btnLookupLow.setText("Low");
 		btnLookupLow.setSelection(true);
 
 		Button btnLookupHigh = new Button(grpLookupTime, SWT.RADIO);
-		btnLookupHigh.setBounds(59, 35, 47, 20);
+		btnLookupHigh.setBounds(77, 35, 60, 20);
 		btnLookupHigh.setText("High");
 		// Lookup
-
-		// // Concurrency
-		// Group grpConcurrencyPerformance = new Group(grpCustom, SWT.BORDER |
-		// SWT.SHADOW_ETCHED_IN);
-		// grpConcurrencyPerformance.setFont(SWTResourceManager.getFont("Segoe
-		// UI", 9, SWT.BOLD));
-		// grpConcurrencyPerformance.setText("Concurrency Performance");
-		// grpConcurrencyPerformance.setBounds(363, 26, 347, 88);
-		//
-		// Button btnConcurrencyHigh = new Button(grpConcurrencyPerformance,
-		// SWT.RADIO);
-		// btnConcurrencyHigh.setBounds(10, 40, 111, 20);
-		// btnConcurrencyHigh.setText("High");
-		// btnConcurrencyHigh.setSelection(true);
-		//
-		// Button btnConcurrencyModerate = new Button(grpConcurrencyPerformance,
-		// SWT.RADIO);
-		// btnConcurrencyModerate.setBounds(204, 40, 111, 20);
-		// btnConcurrencyModerate.setText("Moderate");
-		// // Concurrency
-		//
-		// // Resilience
-		// Group grpFaultResilience = new Group(grpCustom, SWT.BORDER |
-		// SWT.SHADOW_ETCHED_IN);
-		// grpFaultResilience.setFont(SWTResourceManager.getFont("Segoe UI", 9,
-		// SWT.BOLD));
-		// grpFaultResilience.setText("Fault Resilience");
-		// grpFaultResilience.setBounds(716, 26, 442, 88);
-		//
-		// Button btnResilienceHigh = new Button(grpFaultResilience, SWT.RADIO);
-		// btnResilienceHigh.setBounds(10, 43, 111, 20);
-		// btnResilienceHigh.setText("High");
-		// btnResilienceHigh.setSelection(true);
-		//
-		// Button btnResilienceModerate = new Button(grpFaultResilience,
-		// SWT.RADIO);
-		// btnResilienceModerate.setBounds(220, 43, 111, 20);
-		// btnResilienceModerate.setText("Moderate");
-		// // Resilience
 
 		// Access Control
 		Group grpAccessControlPerformance = new Group(grpCustom, SWT.BORDER
@@ -389,7 +368,7 @@ public class CloudFileSelection {
 		grpAccessControlPerformance.setFont(SWTResourceManager.getFont(
 				"Segoe UI", 9, SWT.BOLD));
 		grpAccessControlPerformance.setText("Access Control Performance");
-		grpAccessControlPerformance.setBounds(270, 26, 175, 67);
+		grpAccessControlPerformance.setBounds(270, 26, 193, 67);
 
 		Button btnAccessHigh = new Button(grpAccessControlPerformance,
 				SWT.RADIO);
@@ -399,7 +378,7 @@ public class CloudFileSelection {
 
 		Button btnAccessModerate = new Button(grpAccessControlPerformance,
 				SWT.RADIO);
-		btnAccessModerate.setBounds(83, 36, 72, 20);
+		btnAccessModerate.setBounds(83, 36, 90, 20);
 		btnAccessModerate.setText("Moderate");
 		// Access Control
 
@@ -409,7 +388,7 @@ public class CloudFileSelection {
 		grpMetadataAccess.setFont(SWTResourceManager.getFont("Segoe UI", 9,
 				SWT.BOLD));
 		grpMetadataAccess.setText("Metadta Access Performance");
-		grpMetadataAccess.setBounds(451, 26, 181, 67);
+		grpMetadataAccess.setBounds(469, 26, 195, 67);
 
 		Button btnMetadataHigh = new Button(grpMetadataAccess, SWT.RADIO);
 		btnMetadataHigh.setBounds(10, 37, 73, 20);
@@ -417,68 +396,248 @@ public class CloudFileSelection {
 		btnMetadataHigh.setSelection(true);
 
 		Button btnMetadataModerate = new Button(grpMetadataAccess, SWT.RADIO);
-		btnMetadataModerate.setBounds(89, 37, 72, 20);
+		btnMetadataModerate.setBounds(89, 37, 86, 20);
 		btnMetadataModerate.setText("Moderate");
 		// Metadata access
 
+		Group fileSystemGroup = new Group(shell, SWT.NONE);
+		fileSystemGroup.setBounds(122, 519, 542, 126);
+
+		Button btnStopHdfs = new Button(fileSystemGroup, SWT.NONE);
+		btnStopHdfs.setEnabled(false);
+		btnStopHdfs.setBounds(10, 98, 117, 25);
+		btnStopHdfs.setText("STOP HDFS");
+		
+		Button btnStopSwift = new Button(fileSystemGroup, SWT.NONE);
+		btnStopSwift.setEnabled(false);
+		btnStopSwift.setText("STOP SWIFT");
+		btnStopSwift.setBounds(217, 98, 117, 25);
+		
+		Button btnStopCeph = new Button(fileSystemGroup, SWT.NONE);
+		btnStopCeph.setEnabled(false);
+		btnStopCeph.setText("STOP CEPH");
+		btnStopCeph.setBounds(415, 98, 117, 25);
+		
+		Button btnHdfs = new Button(fileSystemGroup, SWT.NONE);
+		btnHdfs.setEnabled(false);
+		btnHdfs.setText("HDFS");
+		btnHdfs.setBounds(10, 22, 117, 70);
+		Image hdfsImage = new Image(shell.getDisplay(), "hadoop.jpg");
+		btnHdfs.setImage(hdfsImage);
+
+		Button btnSwift = new Button(fileSystemGroup, SWT.NONE);
+		btnSwift.setEnabled(false);
+		btnSwift.setText("SWIFT");
+		Image swiftImage = new Image(shell.getDisplay(), "swift.png");
+		btnSwift.setImage(swiftImage);
+		btnSwift.setBounds(217, 22, 117, 70);
+
+		Button btnCeph = new Button(fileSystemGroup, SWT.NONE);
+		btnCeph.setEnabled(false);
+		btnCeph.setText("CEPH");
+		Image cephImage = new Image(shell.getDisplay(), "ceph.png");
+		btnCeph.setImage(cephImage);
+		btnCeph.setBounds(415, 22, 117, 70);
+
+		btnHdfs.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String command = "hdfsStart.sh";
+				try {
+					Runtime.getRuntime().exec(command, environment);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				btnStopHdfs.setEnabled(true);
+				btnHdfs.setEnabled(false);
+			}
+		});
+
+		btnSwift.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String command = "swiftStart.sh";
+				try {
+					Runtime.getRuntime().exec(command, environment);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+
+		btnCeph.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String command = "cephStart.sh";
+				try {
+					Runtime.getRuntime().exec(command, environment);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		btnStopHdfs.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String command = "hdfsStop.sh";
+				try {
+					Runtime.getRuntime().exec(command, environment);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				btnStopHdfs.setEnabled(false);
+				btnHdfs.setEnabled(true);
+			}
+		});
+
+		btnStopSwift.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String command = "swiftStop.sh";
+				try {
+					Runtime.getRuntime().exec(command, environment);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				btnStopSwift.setEnabled(false);
+				btnSwift.setEnabled(true);
+			}
+		});
+		
+		btnStopCeph.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String command = "cephStop.sh";
+				try {
+					Runtime.getRuntime().exec(command, environment);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				btnStopCeph.setEnabled(false);
+				btnCeph.setEnabled(true);
+			}
+		});
+		
 		Button btnSuggest = new Button(shell, SWT.NONE);
 		btnSuggest.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (btnFileSmall.getSelection()) {
-					selectionMap.put(Parameters.FILE_SIZE,
+					generalSelectionMap.put(Parameters.FILE_SIZE,
 							btnFileSmall.getText());
 				} else {
-					selectionMap.put(Parameters.FILE_SIZE,
+					generalSelectionMap.put(Parameters.FILE_SIZE,
 							btnFileLarge.getText());
 				}
 
 				if (btnFileFew.getSelection()) {
-					selectionMap.put(Parameters.NUMBER_OF_FILES,
+					generalSelectionMap.put(Parameters.NUMBER_OF_FILES,
 							btnFileFew.getText());
 				} else {
-					selectionMap.put(Parameters.NUMBER_OF_FILES,
+					generalSelectionMap.put(Parameters.NUMBER_OF_FILES,
 							btnFileMany.getText());
 				}
 
 				if (btnModeratelyScalable.getSelection()) {
-					selectionMap.put(Parameters.SCALABILITY,
+					generalSelectionMap.put(Parameters.SCALABILITY,
 							btnModeratelyScalable.getText());
 				} else {
-					selectionMap.put(Parameters.SCALABILITY,
+					generalSelectionMap.put(Parameters.SCALABILITY,
 							btnHighlyScalable.getText());
 				}
 
 				if (btnRandomYes.getSelection()) {
-					selectionMap.put(Parameters.RANDOM_ACCESS,
+					generalSelectionMap.put(Parameters.RANDOM_ACCESS,
 							btnRandomYes.getText());
 				} else {
-					selectionMap.put(Parameters.RANDOM_ACCESS,
+					generalSelectionMap.put(Parameters.RANDOM_ACCESS,
 							btnRandomNo.getText());
 				}
 
-				if (btnMetadataHigh.getSelection()) {
-					selectionMap.put(Parameters.METADATA, btnMetaYes.getText());
+				if (btnMetaYes.getSelection()) {
+					generalSelectionMap.put(Parameters.METADATA,
+							btnMetaYes.getText());
 				} else {
-					selectionMap.put(Parameters.METADATA, btnMetaNo.getText());
+					generalSelectionMap.put(Parameters.METADATA,
+							btnMetaNo.getText());
 				}
 
-				if (btnMetadataHigh.getSelection()) {
-					selectionMap.put(Parameters.STORAGE_TYPE,
+				if (btnStorageBlock.getSelection()) {
+					generalSelectionMap.put(Parameters.STORAGE_TYPE,
 							btnStorageBlock.getText());
 				} else {
-					selectionMap.put(Parameters.STORAGE_TYPE,
+					generalSelectionMap.put(Parameters.STORAGE_TYPE,
 							btnStorageObject.getText());
 				}
 
-				Suggestion suggestion = new Suggestion();
-				String recommendation = suggestion.getGeneralSuggestion(
-						selectionMap).getFileSytem();
+				if (btnWriteModerate.getSelection()) {
+					iOzoneSelectionMap.put(Parameters.WRITE,
+							btnWriteModerate.getText());
+				} else {
+					iOzoneSelectionMap.put(Parameters.WRITE,
+							btnWriteHigh.getText());
+				}
 
-				MessageBox box = new MessageBox(shell, SWT.ICON_WORKING);
-				box.setText("Reccommendation");
-				box.setMessage(recommendation);
-				box.open();
+				if (btnReadModerate.getSelection()) {
+					iOzoneSelectionMap.put(Parameters.READ,
+							btnReadModerate.getText());
+				} else {
+					iOzoneSelectionMap.put(Parameters.READ,
+							btnReadHigh.getText());
+				}
+
+				if (btnReWriteModerate.getSelection()) {
+					iOzoneSelectionMap.put(Parameters.RE_WRITE,
+							btnReWriteModerate.getText());
+				} else {
+					iOzoneSelectionMap.put(Parameters.RE_WRITE,
+							btnReWriteHigh.getText());
+				}
+
+				if (btnReReadModerate.getSelection()) {
+					iOzoneSelectionMap.put(Parameters.RE_READ,
+							btnReReadModerate.getText());
+				} else {
+					iOzoneSelectionMap.put(Parameters.RE_READ,
+							btnReReadHigh.getText());
+				}
+
+				if (btnBackwardReadRequired.getSelection()) {
+					iOzoneSelectionMap.put(Parameters.BACKWARD_READ,
+							btnBackwardReadRequired.getText());
+				} else {
+					iOzoneSelectionMap.put(Parameters.BACKWARD_READ,
+							btnBackwardReadNotRequired.getText());
+				}
+
+				if (btnStridedReadRequired.getSelection()) {
+					iOzoneSelectionMap.put(Parameters.STRIDED_READ,
+							btnStridedReadRequired.getText());
+				} else {
+					iOzoneSelectionMap.put(Parameters.STRIDED_READ,
+							btnStridedReadNotRequired.getText());
+				}
+
+				Suggestion suggestion = new Suggestion();
+				suggestion.getGeneralSuggestion(generalSelectionMap);
+
+				FileScore iOzoneRecommendation = suggestion
+						.getIOzoneSuggestion(iOzoneSelectionMap);
+
+				if (iOzoneRecommendation.getFileSystem()
+						.equals(FileSystem.HDFS)) {
+					btnHdfs.setEnabled(true);
+				} else if (iOzoneRecommendation.getFileSystem().equals(
+						FileSystem.SWIFT)) {
+					btnSwift.setEnabled(true);
+				} else {
+					btnCeph.setEnabled(true);
+				}
+				// MessageBox box = new MessageBox(shell, SWT.ICON_WORKING);
+				// box.setText("Recommendation");
+				// box.setMessage(recommendation);
+				// box.open();
 				// MessageDialog.open(MessageDialog.INFORMATION, shell,
 				// "Reccomendation",
 				// "Recommended File System ::" + recommendation, SWT.NONE);
@@ -486,7 +645,7 @@ public class CloudFileSelection {
 		});
 		btnSuggest.setGrayed(true);
 		btnSuggest.setToolTipText("Suggest a file system");
-		btnSuggest.setBounds(204, 637, 331, 30);
+		btnSuggest.setBounds(220, 483, 331, 30);
 		btnSuggest.setText("SUGGEST");
 
 	}
